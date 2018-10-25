@@ -32,6 +32,5 @@ namespace _01_ByteBank
                 cpf = value;
             }
         }
-
     }
 }
