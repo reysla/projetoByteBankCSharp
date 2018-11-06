@@ -8,57 +8,32 @@ namespace _01_ByteBank
 {
     class ContaCorrente
     {
-        public ContaCorrente(Cliente titular, int agencia, int numero)
+        public ContaCorrente(int agencia, int numero)
         {
-            this.Titular = Titular;
-            this.agencia = agencia;
+            if (agencia <= 0)
+            {
+                throw new ArgumentException("O argumento agência precisa ser maior que 0.", nameof(agencia));
+            }
+
+            if (numero <= 0)
+            {
+                throw new ArgumentException("O argumento número precisa ser maior que 0.", nameof(numero));
+            }
+
+            this.Agencia = agencia;
             this.Numero = numero;
 
             TotalDeContasCriadas++;
+            TaxaOperacao = 30 / TotalDeContasCriadas;
         }
 
         public static int TotalDeContasCriadas { get; private set; }
+        public static int TaxaOperacao { get; private set; }
 
         public Cliente Titular { get; set; }
-        private int agencia;
-        private int numero;
+        private int Agencia { get; }
+        private int Numero { get; }
         private double saldo = 100;
-
-        public int Agencia
-        {
-            get
-            {
-                return this.agencia;
-            }
-
-            set
-            {
-                if (value <= 0)
-                {
-                    return;
-                }
-
-                this.agencia = value;
-            }
-        }
-
-        public int Numero
-        {
-            get
-            {
-                return this.numero;
-            }
-
-            set
-            {
-                if (value < 0)
-                {
-                    return;
-                }
-
-                this.numero = value;
-            }
-        }
 
         public double Saldo
         {
@@ -83,16 +58,30 @@ namespace _01_ByteBank
             this.saldo += valor;
         }
 
-        public bool Transferir(double valor, ContaCorrente contaDestino)
+        public void Sacar(double valor)
         {
-            if (this.saldo < valor)
+            if (valor < 0)
             {
-                return false;
+                throw new ArgumentException("Valor inválido para o saque.", nameof(valor));
             }
 
-            this.saldo -= valor;
+            if (this.Saldo < valor)
+            {
+                throw new SaldoInsuficienteException(Saldo, valor);
+            }
+
+            this.Saldo -= valor;
+        }
+
+        public void Transferir(double valor, ContaCorrente contaDestino)
+        {
+            if (this.Saldo < valor)
+            {
+                throw new ArgumentException("Valor inválido para a transferência.", nameof(valor));
+            }
+
+            Sacar(valor);
             contaDestino.Depositar(valor);
-            return true;
         }
     }
 }
